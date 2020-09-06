@@ -24,37 +24,29 @@ const styles = theme => ({
   table: {
     minWidth: 1080
   }
-})
+});
 
-const customers = [
-  {
-    'id': 1,
-    'image': 'https://placeimg.com/64/63/any', // 랜덤으로 이미지 뿌려주는 사이트
-    'name': '홍길동',
-    'birthday': '961222',
-    'gender': '남자',
-    'job': '대학생'
-  },
-  {
-    'id': 2,
-    'image': 'https://placeimg.com/64/62/any', // 랜덤으로 이미지 뿌려주는 사이트
-    'name': '홍길순',
-    'birthday': '921212',
-    'gender': '남자',
-    'job': '대학생'
-  },
-  {
-    'id': 3,
-    'image': 'https://placeimg.com/64/61/any', // 랜덤으로 이미지 뿌려주는 사이트
-    'name': '홍덕순',
-    'birthday': '930221',
-    'gender': '남자',
-    'job': '간호사'
-  }
-]
 
 
 class App extends Component {
+ // state는 데이터가 변경될 수 있는 경우에 씀
+  state = {
+    customers: ""
+  }
+
+  // 서버에서 받아올 때에는 보통 componentDidmount에서 사용한다.
+  componentDidMount() {
+    this.callApi()
+      .then(res => this.setState({customers: res}))
+      .catch(err => console.log(err));
+  }
+
+  callApi = async () => {
+    const response = await fetch('/api/customers');
+    const body = await response.json(); 
+    return body;
+  }
+
   render() {
     const {classes}=this.props;
     return (
@@ -72,7 +64,7 @@ class App extends Component {
             </TableRow>
           </TableHead>
           <TableBody>
-            {customers.map(c=> {return( <Customer 
+            {this.state.customers ? this.state.customers.map(c=> {return( <Customer 
               id={c.id} // map을 사용할때, key를 반드시 써야합니다. id={c.id} // 반복문의 구현을 map을 사용해서 할 수 있습니다. 
               image={c.image}
               name={c.name}
@@ -80,7 +72,7 @@ class App extends Component {
               gender={c.gender}
               job={c.job}
               />
-              );})
+              );}) : ""
             }
           </TableBody>
         </Table>  
