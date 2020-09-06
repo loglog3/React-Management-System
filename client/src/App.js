@@ -3,6 +3,17 @@
 // app.css에서 css를 관리한다.
 // 리액트는 하드코딩하지 않고 props 이용한다. 
 // App.js에서 Customer.js로 전달하면 전달받은 Customer.js에서는 this.props로 전달받는다.
+//순서
+/*
+1) constructor()
+2) componentWillMount()
+3) render()
+4) componentDidMount()
+
+props or state가 변경시 => shouldComponentUpdate() -> render()를 다시 실행한다.
+
+*/
+
 
 import React, { Component } from 'react';
 import './App.css';
@@ -14,6 +25,8 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/paper';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 
 const styles = theme => ({
   root: {
@@ -23,6 +36,9 @@ const styles = theme => ({
   },
   table: {
     minWidth: 1080
+  },
+  progress: {
+    margin: theme.spacing.unit * 2
   }
 });
 
@@ -31,20 +47,29 @@ const styles = theme => ({
 class App extends Component {
  // state는 데이터가 변경될 수 있는 경우에 씀
   state = {
-    customers: ""
+    customers: "",
+    completed: 0
   }
 
   // 서버에서 받아올 때에는 보통 componentDidmount에서 사용한다.
   componentDidMount() {
-    this.callApi()
-      .then(res => this.setState({customers: res}))
-      .catch(err => console.log(err));
+    this.timer = setInterval(this.progress, 20);
+    // this.callApi()
+    //   .then((res) => this.setState({customers: res}))
+    //   .catch(err => console.log(err))
   }
 
   callApi = async () => {
     const response = await fetch('/api/customers');
+    console.log(response);
     const body = await response.json(); 
+    console.log(body);
     return body;
+  }
+
+  progress= () => {
+    const {completed } = this.state;
+    this.setState({ completed: completed >= 100 ? 0 : completed + 1})
   }
 
   render() {
@@ -72,7 +97,14 @@ class App extends Component {
               gender={c.gender}
               job={c.job}
               />
-              );}) : ""
+              );}) : 
+            
+            <TableRow>
+              <TableCell colSpan="6" align="center"> 
+                <CircularProgress className={classes.progress} variant="determinate" value={this.state.completed}/>
+              </TableCell>
+            </TableRow>
+
             }
           </TableBody>
         </Table>  
